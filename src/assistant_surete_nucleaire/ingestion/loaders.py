@@ -15,10 +15,11 @@ from pypdf import PdfReader
 
 @dataclass
 class RawDocument:
-    doc_id: str          # nom de fichier sans extension, utilisé comme identifiant
-    source_path: str      # chemin du fichier source
-    title: str            # titre du document (à défaut, le nom de fichier)
-    pages: list[str]      # texte brut de chaque page, dans l'ordre
+    doc_id: str
+    source_path: str
+    title: str
+    pages: list[str]                      # texte de chaque page (sans les pages de sommaire)
+    pages_with_numbers: list[tuple[int, str]]  # (numéro de page PDF, texte)
 
 
 def is_table_of_contents_page(text: str) -> bool:
@@ -33,39 +34,56 @@ def is_table_of_contents_page(text: str) -> bool:
     """
     clean = " ".join(text.split()).lower()
 
-    # Vérifie si la page commence par "sommaire" ou "table des matières"
-    # (certains PDF ajoutent des caractères avant, d'où le re.search en début de chaîne)
     if re.search(r"^(sommaire|table des matières)", clean):
         return True
 
-    # Si le mot "sommaire" apparaît dans les 200 premiers caractères,
-    # c'est probablement une page de sommaire (car le titre est en haut)
     if re.search(r"sommaire", clean[:200]):
         return True
 
     return False
 
 
+def simplify_doc_id(filename: str) -> str:
+    """
+    Transforme le nom de fichier en un identifiant court compatible
+    avec le golden dataset.
+
+    Exemples :
+      - "Guide de l'ASN n°6 - ..." -> "Guide-de-l-ASN-6"
+      - "Guide de l'ASN n°23 - ..." -> "Guide-de-l-ASN-23"
+    """
+    match = re.search(r"n°\s*(\d+)", filename)
+    if match:
+        number = match.group(1)
+        return f"Guide-de-l-ASN-{number}"
+    return filename.replace(" ", "-")
+
+
 def load_pdf(path: Path) -> RawDocument:
     """Extrait le texte d'un PDF, page par page, en excluant les pages de sommaire."""
     reader = PdfReader(str(path))
-    pages = []
+    pages_texts = []
+    pages_with_numbers = []
+
     for page_number, page in enumerate(reader.pages, start=1):
         text = page.extract_text() or ""
         cleaned = " ".join(text.split())
 
-        # Ignorer les pages qui sont des sommaires
         if is_table_of_contents_page(cleaned):
             print(f"  [INFO] Page {page_number} ignorée (sommaire détecté) dans {path.name}")
             continue
 
-        pages.append(cleaned)
+        pages_texts.append(cleaned)
+        pages_with_numbers.append((page_number, cleaned))
+
+    doc_id = simplify_doc_id(path.stem)
 
     return RawDocument(
-        doc_id=path.stem,
+        doc_id=doc_id,
         source_path=str(path),
         title=path.stem.replace("_", " ").replace("-", " "),
-        pages=pages,
+        pages=pages_texts,
+        pages_with_numbers=pages_with_numbers,
     )
 
 

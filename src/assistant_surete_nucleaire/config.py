@@ -47,6 +47,7 @@ class ConfidenceConfig:
 @dataclass
 class PathsConfig:
     base_dir : Path = Path(__file__).resolve().parent
+    data_dir : Path = base_dir / "data"
     raw_dir: Path = base_dir / "data/raw"
     processed_dir: Path = base_dir / "data/processed"
 

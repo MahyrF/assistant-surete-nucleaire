@@ -44,7 +44,14 @@ def chunk_document(doc: RawDocument) -> list[Chunk]:
     chunks: list[Chunk] = []
     chunk_index = 0
 
-    for page_number, page_text in enumerate(doc.pages, start=1):
+    # Utilise pages_with_numbers si disponible, sinon tombe en compatibilité
+    if hasattr(doc, "pages_with_numbers") and doc.pages_with_numbers:
+        page_iter = doc.pages_with_numbers
+    else:
+        # Fallback pour les anciennes versions sans pages_with_numbers
+        page_iter = [(i + 1, p) for i, p in enumerate(doc.pages)]
+
+    for page_number, page_text in page_iter:
         sentences = split_into_sentences(page_text)
         current = ""
 
@@ -55,16 +62,12 @@ def chunk_document(doc: RawDocument) -> list[Chunk]:
                 current = candidate
                 continue
 
-            # Le chunk courant est plein : on le fige et on démarre le
-            # suivant avec un recouvrement pris à la fin du chunk précédent.
             if current:
                 chunks.append(_make_chunk(doc, page_number, chunk_index, current))
                 chunk_index += 1
                 overlap_text = current[-cfg.chunking.overlap_chars:]
                 current = f"{overlap_text} {sentence}".strip()
             else:
-                # Une phrase seule dépasse déjà la taille cible : on la
-                # garde entière plutôt que de la tronquer arbitrairement.
                 current = candidate
 
         if current:
