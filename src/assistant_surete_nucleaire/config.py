@@ -17,6 +17,7 @@ fichier YAML pour lancer des runs d'évaluation sans toucher au code
 (ex: python run_eval.py --config configs/exp_chunk500.yaml).
 """
 
+from pathlib import Path
 from dataclasses import dataclass, field
 
 
@@ -45,8 +46,9 @@ class ConfidenceConfig:
 
 @dataclass
 class PathsConfig:
-    raw_dir: str = "data/raw"
-    processed_dir: str = "data/processed"
+    base_dir : Path = Path(__file__).resolve().parent
+    raw_dir: Path = base_dir / "data/raw"
+    processed_dir: Path = base_dir / "data/processed"
 
 
 @dataclass

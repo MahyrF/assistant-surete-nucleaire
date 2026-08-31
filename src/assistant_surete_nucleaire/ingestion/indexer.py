@@ -21,12 +21,12 @@ from rank_bm25 import BM25Okapi
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
-from config import config
-from ingestion.chunking import Chunk, chunk_all
-from ingestion.loaders import load_all_pdfs
+from assistant_surete_nucleaire.config import config as cfg
+from assistant_surete_nucleaire.ingestion.chunking import Chunk, chunk_all
+from assistant_surete_nucleaire.ingestion.loaders import load_all_pdfs
 
-RAW_DIR = Path(config.paths.raw_dir)
-PROCESSED_DIR = Path(config.paths.processed_dir)
+RAW_DIR = Path(cfg.paths.raw_dir)
+PROCESSED_DIR = Path(cfg.paths.processed_dir)
 
 
 def tokenize_for_bm25(text: str) -> list[str]:
@@ -45,7 +45,7 @@ def build_bm25_index(chunks: list[Chunk]) -> BM25Okapi:
 
 
 def build_dense_index(chunks: list[Chunk]) -> np.ndarray:
-    model = SentenceTransformer(config.indexing.embedding_model)
+    model = SentenceTransformer(cfg.indexing.embedding_model)
     texts = [c.text for c in chunks]
     embeddings = model.encode(
         texts,

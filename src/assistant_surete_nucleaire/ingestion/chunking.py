@@ -14,8 +14,8 @@ citation exacte (document + page) et à filtrer la recherche si besoin.
 import re
 from dataclasses import dataclass, field
 
-from agent_surete_nucleaire.config import config
-from agent_surete_nucleaire.ingestion.loaders import RawDocument
+from assistant_surete_nucleaire.config import config as cfg
+from assistant_surete_nucleaire.ingestion.loaders import RawDocument
 
 
 @dataclass
@@ -51,7 +51,7 @@ def chunk_document(doc: RawDocument) -> list[Chunk]:
         for sentence in sentences:
             candidate = f"{current} {sentence}".strip()
 
-            if len(candidate) <= config.chunking.target_chunk_chars:
+            if len(candidate) <= cfg.chunking.target_chunk_chars:
                 current = candidate
                 continue
 
@@ -60,7 +60,7 @@ def chunk_document(doc: RawDocument) -> list[Chunk]:
             if current:
                 chunks.append(_make_chunk(doc, page_number, chunk_index, current))
                 chunk_index += 1
-                overlap_text = current[-config.chunking.overlap_chars:]
+                overlap_text = current[-cfg.chunking.overlap_chars:]
                 current = f"{overlap_text} {sentence}".strip()
             else:
                 # Une phrase seule dépasse déjà la taille cible : on la
