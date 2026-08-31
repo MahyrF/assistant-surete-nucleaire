@@ -7,7 +7,12 @@ authors = [
     { name = "Mahyr", email = "106538282+MahyrF@users.noreply.github.com" }
 ]
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "numpy>=2.2.6",
+    "pypdf>=6.16.2",
+    "rank-bm25>=0.2.2",
+    "sentence-transformers>=6.0.0",
+]
 
 [project.scripts]
 assistant-surete-nucleaire = "assistant_surete_nucleaire:main"

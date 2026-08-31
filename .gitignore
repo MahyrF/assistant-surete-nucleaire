@@ -4,6 +4,8 @@ __pycache__/
 build/
 dist/
 wheels/
+#src/assistant_surete_nucleaire/data/raw/*
+src/assistant_surete_nucleaire/data/processed/*
 *.egg-info
 
 # Virtual environments
