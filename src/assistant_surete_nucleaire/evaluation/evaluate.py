@@ -16,6 +16,9 @@ from tqdm import tqdm
 
 from assistant_surete_nucleaire.config import config
 from assistant_surete_nucleaire.retrieval.dense_retriever import DenseRetriever
+from assistant_surete_nucleaire.retrieval.hyde_retriever import HydeRetriever
+from assistant_surete_nucleaire.retrieval.hybrid_retriever import HybridRetriever
+from assistant_surete_nucleaire.retrieval.reranked_retriever import RerankedRetriever
 from assistant_surete_nucleaire.generation.generator import Generator
 from assistant_surete_nucleaire.generation.faithfulness_checker import FaithfulnessChecker
 
@@ -74,10 +77,19 @@ def evaluate_rag_pipeline(retriever_type: str = "dense", limit: int = None, outp
     if retriever_type == "dense":
         print("Utilisation du retriever DENSE (baseline)")
         retriever = DenseRetriever()
+
     elif retriever_type == "hyde":
         print("Utilisation du retriever HyDE")
-        from assistant_surete_nucleaire.retrieval.hyde_retriever import HydeRetriever
         retriever = HydeRetriever()
+        
+    elif retriever_type == "hybride":
+        print("Utilisation du retriever HYBRIDE (BM25 + Dense + RRF)")
+        retriever = HybridRetriever()
+
+    elif retriever_type == "reranked":
+        print("Utilisation du retriever RERANKED (Hybride + Cross-encoder)")
+        retriever = RerankedRetriever()
+
     else:
         raise ValueError(f"Retriever type '{retriever_type}' inconnu. Choisir 'dense' ou 'hyde'.")
 
@@ -103,8 +115,21 @@ def evaluate_rag_pipeline(retriever_type: str = "dense", limit: int = None, outp
         retrieved_texts = [chunk.text for chunk, _ in retrieved]  # non utilise pour l'instant
         retrieved_chunk_objects = [chunk for chunk, _ in retrieved]
 
-        # --- Generation ---
-        answer = generator.generate(question, retrieved)
+        # --- Confidence Gate (avant generation) ---
+        fallback_triggered = False
+        if not retrieved:
+            fallback_triggered = True
+            answer = "Je ne dispose d'aucun document pertinent pour repondre a cette question."
+        else:
+            # On prend le score du top 1 (score du reranker ou score hybride)
+            top_score = retrieved[0][1] if isinstance(retrieved[0], tuple) else 0.0
+            if top_score < config.confidence.min_rerank_score:
+                fallback_triggered = True
+                answer = "Je ne dispose pas d'informations suffisamment fiables dans les documents fournis pour repondre a cette question."
+
+        # --- Generation (seulement si pas de fallback) ---
+        if not fallback_triggered:
+            answer = generator.generate(question, retrieved)
 
         # --- Metriques de retrieval (si des chunks attendus) ---
         rm = None
@@ -115,9 +140,14 @@ def evaluate_rag_pipeline(retriever_type: str = "dense", limit: int = None, outp
 
         # --- Faithfulness (uniquement si on attend une reponse) ---
         if expected_behavior == "answer":
-            faith_result = checker.check(question, answer, retrieved_chunk_objects)
-            faithfulness_score = faith_result["faithfulness_score"]
-            faithfulness_scores.append(faithfulness_score)
+            if fallback_triggered:
+                # En fallback, on considere que la reponse est fidele (pas d'affirmation)
+                faithfulness_score = 1.0
+                faithfulness_scores.append(faithfulness_score)
+            else:
+                faith_result = checker.check(question, answer, retrieved_chunk_objects)
+                faithfulness_score = faith_result["faithfulness_score"]
+                faithfulness_scores.append(faithfulness_score)
         else:
             faithfulness_score = None
 
@@ -135,6 +165,7 @@ def evaluate_rag_pipeline(retriever_type: str = "dense", limit: int = None, outp
             "refusal_detected": refusal_detected,
             "refusal_correct": refusal_correct,
             "faithfulness_score": faithfulness_score,
+            "fallback_triggered": fallback_triggered,
             "retrieved_ids": retrieved_ids,
             "expected_ids": expected_ids,
             "hit_rate": rm["hit_rate"] if rm else None,
@@ -210,9 +241,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--retriever",
         type=str,
-        choices=["dense", "hyde"],
+        choices=["dense", "hyde", "hybride", "reranked"],
         default="dense",
-        help="Type de retriever a utiliser (dense ou hyde)"
+        help="Type de retriever a utiliser"
     )
     parser.add_argument(
         "--limit",

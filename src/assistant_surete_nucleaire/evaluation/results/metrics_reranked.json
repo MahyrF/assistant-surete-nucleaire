@@ -1,0 +1,15 @@
+{
+  "retriever": "reranked",
+  "retrieval": {
+    "avg_hit_rate": 0.6875,
+    "avg_recall": 0.42083333333333334,
+    "avg_precision": 0.11250000000000002,
+    "avg_mrr": 0.4817708333333333
+  },
+  "faithfulness": {
+    "avg_faithfulness": 0.6019296612366954
+  },
+  "refusal": {
+    "refusal_accuracy": 0.8888888888888888
+  }
+}

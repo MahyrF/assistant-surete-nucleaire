@@ -1,0 +1,15 @@
+{
+  "retriever": "hyde",
+  "retrieval": {
+    "avg_hit_rate": 0.4375,
+    "avg_recall": 0.17916666666666667,
+    "avg_precision": 0.043750000000000004,
+    "avg_mrr": 0.17916666666666667
+  },
+  "faithfulness": {
+    "avg_faithfulness": 0.5045589826839827
+  },
+  "refusal": {
+    "refusal_accuracy": 0.8888888888888888
+  }
+}

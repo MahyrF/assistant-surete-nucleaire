@@ -27,7 +27,7 @@ class IndexingConfig:
 @dataclass
 class RetrievalConfig:
     top_k_hybrid: int = 50    # nombre de candidats remontes par la recherche hybride
-    top_k_reranked: int = 5   # nombre de chunks conserves apres reranking
+    top_k_reranked: int = 10   # nombre de chunks conserves apres reranking
     rrf_k: int = 60           # constante de la formule de fusion RRF (1 / (k + rang))
 
 
@@ -63,6 +63,15 @@ class EvaluationConfig:
 
 
 @dataclass
+class RerankerConfig:
+    cross_encoder_model: str = "antoinelouis/crossencoder-mMiniLMv2-L6-mmarcoFR"
+
+
+@dataclass
+class ConfidenceConfig:
+    min_rerank_score: float = 0.3   # Sous ce seuil, on refuse de répondre
+
+@dataclass
 class PathsConfig:
     base_dir: Path = Path(__file__).resolve().parent
     data_dir : Path = base_dir / "data"
@@ -81,7 +90,7 @@ class AppConfig:
     confidence: ConfidenceConfig = field(default_factory=ConfidenceConfig)
     generation: GenerationConfig = field(default_factory=GenerationConfig)
     evaluation: EvaluationConfig = field(default_factory=EvaluationConfig)
-
+    reranker: RerankerConfig = field(default_factory=RerankerConfig)
 
 # Instance par defaut, importable directement depuis n'importe quel script
 config = AppConfig()
