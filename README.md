@@ -147,7 +147,6 @@ Ce paramètre n'est pas une règle gravée dans le marbre : en pratique, il se r
 ### Prérequis
 
 - Docker et Docker Compose installés
-- (Optionnel) Nvidia GPU avec `nvidia-container-toolkit` pour accélérer les modèles
 
 ### 1. Cloner le dépôt
 
