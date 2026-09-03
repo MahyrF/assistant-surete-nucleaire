@@ -8,20 +8,25 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copier les fichiers de dépendances
-COPY pyproject.toml uv.lock* /app/
-# Si tu utilises uv (recommandé)
-RUN pip install uv && uv venv && uv pip install -r pyproject.toml
-# Sinon, avec pip standard
-# RUN pip install --no-cache-dir -e .
+# Copier les fichiers de dépendances + REAADME.md
+COPY pyproject.toml uv.lock* README.md /app/
+
+
+RUN pip install uv && uv venv && \
+    uv pip install -r pyproject.toml
+
 
 # Copier le code source
 COPY src/ /app/src/
-COPY app_streamlit.py /app/
-COPY config.py /app/
+
+
+#installer le package en mode editable
+RUN uv pip install -e /app
+
 
 # Variable d'environnement pour Python
 ENV PYTHONPATH=/app/src
+
 
 # Commande par défaut (surchargée par docker-compose)
 CMD ["uvicorn", "assistant_surete_nucleaire.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
