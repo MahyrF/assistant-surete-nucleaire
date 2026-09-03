@@ -142,13 +142,53 @@ Ce paramètre n'est pas une règle gravée dans le marbre : en pratique, il se r
 
 ---
 
-## Installation et lancement
+## Installation et lancement avec Docker
+
+### Prérequis
+
+- Docker et Docker Compose installés
+- (Optionnel) Nvidia GPU avec `nvidia-container-toolkit` pour accélérer les modèles
 
 ### 1. Cloner le dépôt
 
 ```bash
-git clone https://github.com/votre-username/assistant-rag-asn.git
-cd assistant-rag-asn
+git clone https://github.com/MahyrF/assistant-surete-nucleaire.git
+cd assistant-surete-nucleaire
+```
+
+### 2. Construire et lancer les conteneurs
+
+```bash
+docker-compose up -d --build
+```
+
+### 3. Télécharger les modèles Ollama (une seule fois)
+
+```bash
+docker exec -it rag-ollama ollama pull mistral:7b-instruct-v0.3-q5_0
+docker exec -it rag-ollama ollama pull llama3.2:3b
+```
+
+### 4. Ingérer les documents (si des PDF sont présents dans data/raw/)
+
+```bash
+docker-compose run --rm api python -m assistant_surete_nucleaire.ingestion.indexer
+```
+
+### 5. Accéder à l'interface Streamlit
+
+Ouvrir [http://localhost:8501](http://localhost:8501) dans le navigateur.
+
+
+---
+
+## Installation et lancement sans Docker
+
+### 1. Cloner le dépôt
+
+```bash
+git clone https://github.com/MahyrF/assistant-surete-nucleaire.git
+cd assistant-surete-nucleaire
 ```
 
 ### 2. Créer un environnement virtuel
@@ -192,45 +232,6 @@ uvicorn assistant_surete_nucleaire.api.main:app --reload --port 8000
 ```bash
 streamlit run src/assistant_surete_nucleaire/app_streamlit.py
 ```
-
-Ouvrir [http://localhost:8501](http://localhost:8501) dans le navigateur.
-
----
-
-## Installation et lancement avec Docker
-
-### Prérequis
-
-- Docker et Docker Compose installés
-- (Optionnel) Nvidia GPU avec `nvidia-container-toolkit` pour accélérer les modèles
-
-### 1. Cloner le dépôt
-
-```bash
-git clone https://github.com/votre-username/assistant-rag-asn.git
-cd assistant-rag-asn
-```
-
-### 2. Construire et lancer les conteneurs
-
-```bash
-docker-compose up -d --build
-```
-
-### 3. Télécharger les modèles Ollama (une seule fois)
-
-```bash
-docker exec -it rag-ollama ollama pull mistral:7b-instruct-v0.3-q5_0
-docker exec -it rag-ollama ollama pull llama3.2:3b
-```
-
-### 4. Ingérer les documents (si des PDF sont présents dans data/raw/)
-
-```bash
-docker-compose run --rm api python -m assistant_surete_nucleaire.ingestion.indexer
-```
-
-### 5. Accéder à l'interface Streamlit
 
 Ouvrir [http://localhost:8501](http://localhost:8501) dans le navigateur.
 
