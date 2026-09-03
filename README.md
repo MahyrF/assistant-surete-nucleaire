@@ -132,9 +132,9 @@ Le système refuse parfaitement les questions hors périmètre et maintient une 
 
 ### Évolution du choix de top_k (de 10 à 5)
 
-`top_k=5` est le standard "textbook" pour trois raisons historiques : les premiers pipelines RAG utilisaient des LLM à petite fenêtre de contexte, moins de tokens réduisait coût et latence, et un contexte restreint forçait le modèle à rester concis.
+`top_k=5` est le standard pour trois raisons historiques : les premiers pipelines RAG utilisaient des LLM à petite fenêtre de contexte, moins de tokens réduisait coût et latence, et un contexte restreint forçait le modèle à rester concis.
 
-Le tableau comparatif ci-dessus (Dense / Hybride / Reranked) a été obtenu avec `top_k=10`, pour vérifier que le reranker ne perdait pas d'informations pertinentes en route : les chunks classés 6e à 8e contiennent parfois des éléments complémentaires (une phrase qui contextualise un terme technique, par exemple), et avec des chunks courts (environ 800 caractères, 150-200 tokens), 10 chunks ne représentent qu'environ 2000 tokens — largement dans la fenêtre de contexte de 8k/32k de Mistral 7B.
+Le tableau comparatif ci-dessus (Dense / Hybride / Reranked) a été obtenu avec `top_k=10`, pour vérifier que le reranker ne perdait pas d'informations pertinentes en route : les chunks classés 6e à 8e contiennent parfois des éléments complémentaires (une phrase qui contextualise un terme technique, par exemple), et avec des chunks courts (environ 800 caractères, 150-200 tokens), 10 chunks ne représentent qu'environ 2000 tokens, largement dans la fenêtre de contexte de 8k/32k de Mistral 7B.
 
 Le choix final s'est toutefois porté sur `top_k=5` pour la configuration de production, qui offre le meilleur compromis entre précision du retrieval et qualité/concision de la génération sur ce corpus. Le tableau "Résultat final" ci-dessous correspond à cette configuration `top_k=5`.
 
