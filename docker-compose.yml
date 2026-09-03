@@ -1,45 +1,47 @@
-version: '3.8'
-
 services:
-  # Service Ollama (modèles LLM)
+
   ollama:
     image: ollama/ollama:latest
     container_name: rag-ollama
-    volumes:
-      - ollama_data:/root/.ollama
     ports:
       - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
     restart: unless-stopped
 
-  # Service API FastAPI
+
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: rag-api
-    volumes:
-      - ./data:/app/data          # Monte les données (raw, processed, golden)
-    environment:
-      - OLLAMA_HOST=http://ollama:11434
-      - API_BASE_URL=http://api:8000
-    ports:
-      - "8000:8000"
     depends_on:
       - ollama
-    command: uvicorn assistant_surete_nucleaire.api.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      # Persistance de l'index et des PDF source entre les runs
+      # (indispensable : `docker compose run --rm api ...ingestion.indexer`
+      # tourne dans un conteneur jetable, sans volume l'index généré serait perdu)
+      - ./src/assistant_surete_nucleaire/data:/app/src/assistant_surete_nucleaire/data
     restart: unless-stopped
 
-  # Service Streamlit (interface)
   streamlit:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: rag-streamlit
-    volumes:
-      - ./data:/app/data
-    environment:
-      - API_BASE_URL=http://api:8000
-    ports:
-      - "8501:8501"
     depends_on:
       - api
-    command: streamlit run /app/app_streamlit.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+    command: >
+      streamlit run src/assistant_surete_nucleaire/app_streamlit.py
+      --server.address=0.0.0.0 --server.port=8501
     restart: unless-stopped
 
 volumes:
