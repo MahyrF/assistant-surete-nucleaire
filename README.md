@@ -70,7 +70,7 @@ La réécriture de requête n'intervient que s'il existe un historique de conver
 | LLM local (génération) | Mistral 7B Instruct v0.3 (via Ollama) |
 | LLM local (faithfulness) | Llama 3.2 3B (via Ollama) |
 | Embeddings | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` |
-| Reranking | `cross-encoder/ms-marco-MiniLM-L-6-v2` |
+| Reranking | `"antoinelouis/crossencoder-mMiniLMv2-L6-mmarcoFR` |
 | Indexation | BM25 (`rank_bm25`) + FAISS (dense) |
 | Fusion | RRF (Reciprocal Rank Fusion) |
 | Backend | FastAPI |
@@ -79,7 +79,7 @@ La réécriture de requête n'intervient que s'il existe un historique de conver
 
 ### Pourquoi ce cross-encoder
 
-`cross-encoder/ms-marco-MiniLM-L-6-v2` a été retenu comme point de départ pour trois raisons :
+`"antoinelouis/crossencoder-mMiniLMv2-L6-mmarcoFR` a été retenu comme point de départ pour trois raisons :
 
 - Performances solides : MRR@10 de 33,34 % et Recall@10 de 58,4 % sur le dataset de référence mMARCO-fr
 - Léger et rapide : environ 100 millions de paramètres, efficace même sur CPU
