@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Service Ollama (modèles LLM)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: rag-ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+
+  # Service API FastAPI
+  api:
+    build: .
+    container_name: rag-api
+    volumes:
+      - ./data:/app/data          # Monte les données (raw, processed, golden)
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - API_BASE_URL=http://api:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - ollama
+    command: uvicorn assistant_surete_nucleaire.api.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+
+  # Service Streamlit (interface)
+  streamlit:
+    build: .
+    container_name: rag-streamlit
+    volumes:
+      - ./data:/app/data
+    environment:
+      - API_BASE_URL=http://api:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+    command: streamlit run /app/app_streamlit.py --server.port 8501 --server.address 0.0.0.0
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
