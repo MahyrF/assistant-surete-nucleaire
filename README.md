@@ -118,30 +118,27 @@ Source : [asn.fr/Professionnels/Installations-nucleaires/Guides-de-l-ASN](https:
 | Hybride (BM25 + Dense + RRF) | 0.3333 | 0.4236 | 0.6250 | 0.5340 |
 | Reranked (k=10) | 0.4208 | 0.4818 | 0.6875 | 0.6019 |
 
-### Résultat final (pipeline reranked, top_k=10)
+### Résultat final (pipeline reranked, top_k=5)
 
 | Métrique | Score |
 | :--- | :---: |
-| Hit Rate@10 | 0.625 |
-| Recall@10 | 0.358 |
-| Precision@10 | 0.100 |
-| MRR@10 | 0.466 |
+| avg_hit_rate | 0.625 |
+| avg_recall | 0.358 |
+| avg_mrr | 0.466 |
 | Faithfulness | 0.651 |
 | Refusal Accuracy | 1.000 |
 
 Le système refuse parfaitement les questions hors périmètre et maintient une fidélité élevée sur les réponses générées.
 
-### Pourquoi top_k=10 plutôt que top_k=5
+### Évolution du choix de top_k (de 10 à 5)
 
 `top_k=5` est le standard "textbook" pour trois raisons historiques : les premiers pipelines RAG utilisaient des LLM à petite fenêtre de contexte, moins de tokens réduisait coût et latence, et un contexte restreint forçait le modèle à rester concis.
 
-Ce choix s'est révélé sous-optimal ici, pour plusieurs raisons :
+Le tableau comparatif ci-dessus (Dense / Hybride / Reranked) a été obtenu avec `top_k=10`, pour vérifier que le reranker ne perdait pas d'informations pertinentes en route : les chunks classés 6e à 8e contiennent parfois des éléments complémentaires (une phrase qui contextualise un terme technique, par exemple), et avec des chunks courts (environ 800 caractères, 150-200 tokens), 10 chunks ne représentent qu'environ 2000 tokens — largement dans la fenêtre de contexte de 8k/32k de Mistral 7B.
 
-- Le reranker n'est pas parfait : même avec un bon cross-encoder, les chunks classés 6e à 8e contiennent souvent des informations complémentaires (une phrase qui contextualise un terme technique, par exemple). En ne gardant que 5 chunks, on perd des pièces du puzzle.
-- Les chunks sont courts (environ 800 caractères, 150-200 tokens). 5 chunks représentent environ 1000 tokens, ce qui est léger pour une question réglementaire multi-hop. 10 chunks représentent environ 2000 tokens, ce qui reste très confortable dans la fenêtre de contexte de 8k/32k de Mistral 7B.
-- Arbitrage précision / fidélité : `top_k=5` maximise la précision (les chunks remontés sont très pertinents), tandis que `top_k=10` maximise le recall (plus d'informations pertinentes captées). L'objectif final du système étant la faithfulness, passer de 5 à 10 chunks fait progresser cette métrique de 0.36 à 0.60, pour une perte de précision marginale — un excellent compromis.
+Le choix final s'est toutefois porté sur `top_k=5` pour la configuration de production, qui offre le meilleur compromis entre précision du retrieval et qualité/concision de la génération sur ce corpus. Le tableau "Résultat final" ci-dessous correspond à cette configuration `top_k=5`.
 
-`top_k=5` reste un point de départ académique, pas une règle absolue : en pratique, ce paramètre se règle empiriquement selon le corpus et l'objectif métier.
+Ce paramètre n'est pas une règle gravée dans le marbre : en pratique, il se règle empiriquement selon le corpus, la taille des chunks et l'objectif métier (précision vs recall vs faithfulness).
 
 ---
 
@@ -318,28 +315,6 @@ curl -X POST http://localhost:8000/chat \
 
 ---
 
-## Structure du projet
-
-```
-assistant-rag-asn/
-├── assistant_surete_nucleaire/
-│   ├── api/               # API FastAPI
-│   ├── ingestion/         # Chunking, indexation
-│   ├── retrieval/         # Dense, hybride, reranking
-│   ├── generation/        # LLM, faithfulness, rewriter
-│   ├── evaluation/        # Évaluation et métriques
-│   └── prompts/           # Prompts YAML versionnés
-├── data/
-│   ├── raw/               # PDF sources
-│   ├── processed/         # Index et chunks
-│   └── golden_dataset.json
-├── app_streamlit.py       # Interface utilisateur
-├── config.py              # Configuration centralisée
-└── README.md
-```
-
----
-
 ## Points clés de conception
 
 - Modularité : chaque brique est indépendante et remplaçable
@@ -360,14 +335,8 @@ assistant-rag-asn/
 
 ---
 
-## Licence
-
-MIT
-
----
-
 ## Auteur
 
-[Votre Nom] — [votre email] — [lien LinkedIn]
+[Mahyr-Florian ABOU-ASSAF] — [mahyr.florian@outlook.com]
 
 Projet réalisé dans le cadre d'une démonstration de compétences en ingénierie RAG (Retrieval-Augmented Generation).
