@@ -31,12 +31,6 @@ class RetrievalConfig:
     rrf_k: int = 60           # constante de la formule de fusion RRF (1 / (k + rang))
 
 
-@dataclass
-class ConfidenceConfig:
-    min_rerank_score: float = 0.3   # sous ce seuil, on declenche le fallback
-
-
-
 # assistant_surete_nucleaire/config.py (extrait ajouté)
 @dataclass
 class GenerationConfig:
@@ -71,6 +65,7 @@ class RerankerConfig:
 class ConfidenceConfig:
     min_rerank_score: float = 0.3   # Sous ce seuil, on refuse de répondre
 
+
 @dataclass
 class PathsConfig:
     base_dir: Path = Path(__file__).resolve().parent
@@ -89,6 +84,12 @@ class APIConfig:
     timeout: int = int(os.getenv("API_TIMEOUT", "120"))
 
 @dataclass
+class DynamicConfig:
+    #paramètres directement modifiables par l'utilisateur depuis une interface
+    min_rerank_score: float = 0.3
+
+
+@dataclass
 class AppConfig:
     paths: PathsConfig = field(default_factory=PathsConfig)
     chunking: ChunkingConfig = field(default_factory=ChunkingConfig)
@@ -99,6 +100,7 @@ class AppConfig:
     evaluation: EvaluationConfig = field(default_factory=EvaluationConfig)
     reranker: RerankerConfig = field(default_factory=RerankerConfig)
     api: APIConfig = field(default_factory=APIConfig)
+    dynamic: DynamicConfig = field(default_factory=DynamicConfig)  # config utilisateur
 
 # Instance par defaut, importable directement depuis n'importe quel script
 config = AppConfig()

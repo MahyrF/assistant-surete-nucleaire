@@ -2,11 +2,6 @@
 import streamlit as st
 import requests
 import time
-
-# app_streamlit.py
-import streamlit as st
-import requests
-import time
 from assistant_surete_nucleaire.config import config
 
 # Construction de l'URL à partir de la config
@@ -72,20 +67,19 @@ with st.sidebar:
     st.header("Configuration du pipeline")
     
     st.subheader("Modèles")
-    st.write("**Génération :** Mistral 7B (local)")
-    st.write("**Reranking :** cross-encoder-mMiniLMv2 (local)")
-    st.write("**Faithfulness :** Llama 3.2 3B (local)")
+    st.write(f"**Génération :** {config.generation.local_model_generation}")
+    st.write(f"\n\n**Reranking :** {config.reranker.cross_encoder_model}")
+    st.write(f"\n\n**Faithfulness :** {config.generation.local_model_faithfulness}")
+
+    st.caption("Modèles exécutés localement via Ollama")
     
     st.divider()
     
     st.subheader("Paramètres")
     st.write("**Top-k retrieval :** 10 chunks")
-    st.write("**Seuil de confiance :** 0.3")
     st.write("**Type de recherche :** Hybride + Reranking")
     
     st.divider()
-    st.caption("Modèles exécutés localement via Ollama")
-    st.caption("Pipeline complet : réécriture --> hybride --> reranking --> contrôle de confiance --> génération")
 
 # ─── INITIALISATION ──────────────────────────────────────
 if "messages" not in st.session_state:
@@ -108,7 +102,7 @@ if question := st.chat_input("Posez votre question sur les documents..."):
             start_time = time.time()
             
             try:
-                response = requests.post(API_URL, json={"question": question, "history": history}, timeout=TIMEOUT)
+                response = requests.post(API_URL, json={"question": question, "history": history}, timeout=config.api.timeout)
                 elapsed = time.time() - start_time
 
                 if response.status_code == 200:
