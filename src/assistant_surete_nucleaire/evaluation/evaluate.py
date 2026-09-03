@@ -21,7 +21,7 @@ from assistant_surete_nucleaire.retrieval.hybrid_retriever import HybridRetrieve
 from assistant_surete_nucleaire.retrieval.reranked_retriever import RerankedRetriever
 from assistant_surete_nucleaire.generation.generator import Generator
 from assistant_surete_nucleaire.generation.faithfulness_checker import FaithfulnessChecker
-
+from assistant_surete_nucleaire.generation.query_rewriter import QueryRewriter
 
 def compute_retrieval_metrics(retrieved_ids: list[str], expected_ids: list[str], k: int = 10):
     """Calcule les metriques de retrieval pour une question."""
@@ -66,7 +66,9 @@ def evaluate_rag_pipeline(retriever_type: str = "dense", limit: int = None, outp
     
     with open(golden_path, "r", encoding="utf-8") as f:
         data = json.load(f)
+
     questions = data["questions"]
+    rewriter = QueryRewriter()
 
     # Limitation eventuelle pour les tests rapides
     if limit:
@@ -102,17 +104,24 @@ def evaluate_rag_pipeline(retriever_type: str = "dense", limit: int = None, outp
     faithfulness_scores = []
 
     for item in tqdm(questions, desc="Evaluation"):
-        question = item["question"]
+        # --- Récupération des données de l'item ---
+        original_question = item["question"]
         expected_ids = item.get("expected_chunk_ids", [])
         expected_behavior = item.get("expected_behavior", "answer")
         reference_answer = item.get("reference_answer", "")
-        conversation_history = item.get("conversation_history", [])  # non utilise pour l'instant
+        conversation_history = item.get("conversation_history", [])
 
-        # --- Retrieval ---
+        # --- Reecriture de la requete (si historique) ---
+        question = original_question
+        if conversation_history:
+            question = rewriter.rewrite(original_question, conversation_history)
+            print(f"[Rewriting] '{original_question}' -> '{question}'")
+
+        # --- Retrieval (avec la question reecrite) ---
         top_k = config.evaluation.top_k_eval
         retrieved = retriever.retrieve(question, top_k=top_k)
         retrieved_ids = [chunk.chunk_id for chunk, _ in retrieved]
-        retrieved_texts = [chunk.text for chunk, _ in retrieved]  # non utilise pour l'instant
+        retrieved_texts = [chunk.text for chunk, _ in retrieved]
         retrieved_chunk_objects = [chunk for chunk, _ in retrieved]
 
         # --- Confidence Gate (avant generation) ---

@@ -7,7 +7,7 @@ et de comparer les scores RAGAS en fonction des reglages.
 
 Chaque section du pipeline a sa propre dataclass, regroupees dans AppConfig.
 """
-
+import os
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional
@@ -27,7 +27,7 @@ class IndexingConfig:
 @dataclass
 class RetrievalConfig:
     top_k_hybrid: int = 50    # nombre de candidats remontes par la recherche hybride
-    top_k_reranked: int = 10   # nombre de chunks conserves apres reranking
+    top_k_reranked: int = 5   # nombre de chunks conserves apres reranking
     rrf_k: int = 60           # constante de la formule de fusion RRF (1 / (k + rang))
 
 
@@ -48,7 +48,7 @@ class GenerationConfig:
     api_llm_model: str = "gpt-3.5-turbo"
     openai_api_key: Optional[str] = None
     max_tokens: int = 500
-    temperature: float = 0.1  # On baisse un peu pour la génération RAG
+    temperature: float = 0.05  # On baisse un peu pour la génération RAG
     prompt_version: str = "v1.0"
 
 
@@ -80,6 +80,13 @@ class PathsConfig:
     # Les chemins specifiques a l'evaluation sont initialises avec des valeurs par defaut
     # mais peuvent etre surcharges par EvaluationConfig si besoin
 
+@dataclass
+class APIConfig:
+    # On lit la variable d'environnement API_URL, ou localhost par défaut
+    base_url: str = os.getenv("API_URL", "http://localhost:8000")
+    chat_endpoint: str = "/chat"
+    health_endpoint: str = "/health"
+    timeout: int = int(os.getenv("API_TIMEOUT", "120"))
 
 @dataclass
 class AppConfig:
@@ -91,6 +98,7 @@ class AppConfig:
     generation: GenerationConfig = field(default_factory=GenerationConfig)
     evaluation: EvaluationConfig = field(default_factory=EvaluationConfig)
     reranker: RerankerConfig = field(default_factory=RerankerConfig)
+    api: APIConfig = field(default_factory=APIConfig)
 
 # Instance par defaut, importable directement depuis n'importe quel script
 config = AppConfig()
