@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Données (ne pas copier les PDF dans l'image)
+src/assistant_surete_nucleaire/data/raw/*.pdf
+src/assistant_surete_nucleaire/data/processed/
+
+# Logs et métriques
+*.log
+evaluation/results/
+
+# Fichiers d'environnement
+.env
+*.pem
+*.key
+
+# Fichiers Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Autres
+*.tmp
+*.bak
+.ds_store
+Thumbs.db
