@@ -70,7 +70,7 @@ La réécriture de requête n'intervient que s'il existe un historique de conver
 | LLM local (génération) | Mistral 7B Instruct v0.3 (via Ollama) |
 | LLM local (faithfulness) | Llama 3.2 3B (via Ollama) |
 | Embeddings | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` |
-| Reranking | `"antoinelouis/crossencoder-mMiniLMv2-L6-mmarcoFR` |
+| Reranking | `antoinelouis/crossencoder-mMiniLMv2-L6-mmarcoFR` |
 | Indexation | BM25 (`rank_bm25`) + FAISS (dense) |
 | Fusion | RRF (Reciprocal Rank Fusion) |
 | Backend | FastAPI |
