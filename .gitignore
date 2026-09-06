@@ -6,6 +6,7 @@ dist/
 wheels/
 #src/assistant_surete_nucleaire/data/raw/*
 src/assistant_surete_nucleaire/data/processed/*
+src/assistant_surete_nucleaire/evaluation/results/*
 *.egg-info
 
 # Virtual environments
