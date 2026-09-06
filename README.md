@@ -168,7 +168,7 @@ docker exec -it rag-ollama ollama pull mistral:7b-instruct-v0.3-q5_0
 docker exec -it rag-ollama ollama pull llama3.2:3b
 ```
 
-### 4. Ingérer les documents (si des PDF sont présents dans data/raw/)
+### 4. Ingérer les documents (PDF dans data/raw/)
 
 ```bash
 docker-compose run --rm api python -m assistant_surete_nucleaire.ingestion.indexer
