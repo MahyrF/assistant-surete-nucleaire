@@ -1,5 +1,4 @@
 services:
-
   ollama:
     image: ollama/ollama:latest
     container_name: rag-ollama
@@ -9,11 +8,8 @@ services:
       - ollama_data:/root/.ollama
     restart: unless-stopped
 
-
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: rag-api
     depends_on:
       - ollama
@@ -22,26 +18,25 @@ services:
     environment:
       - OLLAMA_HOST=http://ollama:11434
     volumes:
-      # Persistance de l'index et des PDF source entre les runs
-      # (indispensable : `docker compose run --rm api ...ingestion.indexer`
-      # tourne dans un conteneur jetable, sans volume l'index généré serait perdu)
       - ./src/assistant_surete_nucleaire/data:/app/src/assistant_surete_nucleaire/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   streamlit:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: rag-streamlit
-    depends_on:
-      - api
     ports:
       - "8501:8501"
     environment:
       - API_URL=http://api:8000
-    command: >
-      streamlit run src/assistant_surete_nucleaire/app_streamlit.py
-      --server.address=0.0.0.0 --server.port=8501
+      - PYTHONPATH=/app/src
+    volumes:
+      - ./src/assistant_surete_nucleaire/data:/app/src/assistant_surete_nucleaire/data
+    command: /app/wait-for-it.sh api:8000 --timeout=10 --strict -- streamlit run /app/src/assistant_surete_nucleaire/app_streamlit.py --server.address=0.0.0.0 --server.port=8501
     restart: unless-stopped
 
 volumes:
