@@ -79,7 +79,7 @@ La réécriture de requête n'intervient que s'il existe un historique de conver
 
 ### Pourquoi ce cross-encoder
 
-`"antoinelouis/crossencoder-mMiniLMv2-L6-mmarcoFR` a été retenu comme point de départ pour trois raisons :
+`antoinelouis/crossencoder-mMiniLMv2-L6-mmarcoFR` a été retenu comme point de départ pour trois raisons :
 
 - Performances solides : MRR@10 de 33,34 % et Recall@10 de 58,4 % sur le dataset de référence mMARCO-fr
 - Léger et rapide : environ 100 millions de paramètres, efficace même sur CPU
