@@ -81,7 +81,7 @@ class APIConfig:
     base_url: str = os.getenv("API_URL", "http://localhost:8000")
     chat_endpoint: str = "/chat"
     health_endpoint: str = "/health"
-    timeout: int = int(os.getenv("API_TIMEOUT", "120"))
+    timeout: int = int(os.getenv("API_TIMEOUT", "300"))
 
 @dataclass
 class DynamicConfig:
