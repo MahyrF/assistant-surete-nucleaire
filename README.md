@@ -198,10 +198,14 @@ source .venv/bin/activate  # Linux / Mac
 # .venv\Scripts\activate   # Windows
 ```
 
-### 3. Installer les dépendances
+### 3. Installer uv et les dépendances
 
 ```bash
-pip install -r requirements.txt
+# Installer uv (si ce n'est pas déjà fait)
+pip install uv
+
+# Créer l'environnement virtuel et installer les dépendances
+uv sync
 ```
 
 ### 4. Installer Ollama et les modèles
