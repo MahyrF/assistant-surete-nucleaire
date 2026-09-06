@@ -340,6 +340,6 @@ curl -X POST http://localhost:8000/chat \
 
 ## Auteur
 
-[Mahyr-Florian ABOU-ASSAF] — [mahyr.florian@outlook.com]
+[Mahyr-Florian] — [mahyr.florian@outlook.com]
 
 Projet réalisé dans le cadre d'une démonstration de compétences en ingénierie RAG (Retrieval-Augmented Generation).
