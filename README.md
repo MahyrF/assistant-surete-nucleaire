@@ -20,12 +20,12 @@ Assistant conversationnel basé sur un pipeline RAG (Retrieval-Augmented Generat
 ## Architecture du pipeline
 
 ```
-Question utilisateur
-        |
-        v
-Réécriture (si historique)
-        |
-        v
+          Question utilisateur
+                  |
+                  v
+       Réécriture (si historique)
+                  |
+                  v
 +-----------------------------------+
 |        RETRIEVAL HYBRIDE          |
 |   BM25 + Dense + RRF (top 50)     |
@@ -71,7 +71,7 @@ La réécriture de requête n'intervient que s'il existe un historique de conver
 | LLM local (faithfulness) | Llama 3.2 3B (via Ollama) |
 | Embeddings | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` |
 | Reranking | `antoinelouis/crossencoder-mMiniLMv2-L6-mmarcoFR` |
-| Indexation | BM25 (`rank_bm25`) + FAISS (dense) |
+| Indexation | BM25 (`rank_bm25`) + Dense (Sentence Transformer + numpy) |
 | Fusion | RRF (Reciprocal Rank Fusion) |
 | Backend | FastAPI |
 | Frontend | Streamlit |
@@ -342,4 +342,4 @@ curl -X POST http://localhost:8000/chat \
 
 [Mahyr-Florian] — [mahyr.florian@outlook.com]
 
-Projet réalisé dans le cadre d'une démonstration de compétences en ingénierie RAG (Retrieval-Augmented Generation).
+Projet réalisé dans le cadre d'une démonstration de compétences en ingénierie RAG..
